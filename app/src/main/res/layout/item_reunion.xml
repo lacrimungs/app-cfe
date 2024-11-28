@@ -1,0 +1,75 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:layout_marginBottom="8dp"
+    tools:context=".ReunionesFragment"
+    android:background="#FFFFFF">
+
+    <!-- Contenedor Horizontal para "Asunto" y la palomita -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_alignParentTop="true"
+        android:background="#D32F2F"
+    android:padding="8dp">
+
+        <TextView
+            android:id="@+id/asunto"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Asunto de la Reunión"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
+
+        <!-- Icono de Palomita -->
+        <ImageView
+            android:id="@+id/palomita"
+            android:layout_width="24dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/palomita" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/motivoReunion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/palomita"
+        android:layout_marginTop="41dp"
+        android:background="#F0F0F0"
+        android:padding="8dp"
+        android:text="Motivo de la reunión"
+        android:textColor="@android:color/black"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/fecha"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/motivoReunion"
+        android:layout_marginTop="-1dp"
+        android:background="#FFFF00"
+        android:padding="8dp"
+        android:text="Fecha"
+        android:textColor="@android:color/black"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/medio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fecha"
+        android:layout_marginTop="1dp"
+        android:background="#81C784"
+        android:padding="8dp"
+        android:text="Medio"
+        android:textColor="@android:color/black"
+        android:textSize="16sp" />
+
+</RelativeLayout>

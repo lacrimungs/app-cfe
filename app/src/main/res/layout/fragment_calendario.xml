@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#FFFFFF">
+
+    <!-- Logotipos -->
+    <LinearLayout
+        android:id="@+id/logos_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp">
+
+        <!-- Logo CFE -->
+        <ImageView
+            android:layout_width="150dp"
+            android:layout_height="80dp"
+            android:layout_marginTop="18dp"
+            android:layout_marginEnd="16dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/cfe_logo" />
+
+        <!-- Logo SUTERM -->
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="80dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="18dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/suterm_logo" />
+    </LinearLayout>
+
+    <!-- CalendarView para seleccionar las fechas -->
+    <android.widget.CalendarView
+        android:id="@+id/calendarView"
+        android:layout_width="match_parent"
+        android:layout_height="340dp"
+    android:layout_gravity="center"
+    android:layout_marginBottom="16dp"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:padding="8dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp" />
+
+    <!-- ScrollView para hacer que los eventos sean desplazables -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:paddingTop="16dp">
+
+        <!-- Contenedor para mostrar los eventos -->
+        <LinearLayout
+            android:id="@+id/eventosContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="16dp" />
+    </ScrollView>
+
+    <!-- ProgressBar para mostrar mientras se cargan los eventos -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+</LinearLayout>
+
+
+
+
+
+
+
+
+

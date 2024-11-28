@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_micuenta"
+        android:icon="@drawable/circle_user_solid"
+        android:title="Mi cuenta"/>
+    <item
+        android:id="@+id/navigation_campana"
+        android:icon="@drawable/bell_solid"
+        android:title="Noficaciones"/>
+    <item
+        android:id="@+id/navigation_calendario"
+        android:icon="@drawable/calendar_days_regular"
+        android:title="Calendario"/>
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/clock_regular__1_"
+        android:title=" MenuPrincipal"/>
+</menu>

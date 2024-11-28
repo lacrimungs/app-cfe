@@ -1,0 +1,85 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ReunionesFragment"
+    android:background="#FFFFFF">
+
+    <!-- ScrollView para permitir desplazamiento -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <!-- Contenedor principal -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <!-- Logotipos -->
+            <LinearLayout
+                android:id="@+id/logos_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="80dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/cfe_logo"
+                    android:scaleType="centerInside"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="18dp"/>
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="80dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/suterm_logo"
+                    android:scaleType="centerInside"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="18dp"/>
+            </LinearLayout>
+
+            <!-- Título con Imagen -->
+            <LinearLayout
+                android:id="@+id/tituloLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="20dp">
+
+                <TextView
+                    android:id="@+id/titulo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Reuniones"
+                    android:textSize="25sp"
+                    android:paddingBottom="8dp"
+                    android:textColor="@android:color/black" />
+
+                <ImageView
+                    android:id="@+id/signo"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:src="@drawable/signo"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+
+            <!-- LinearLayout para reuniones -->
+            <LinearLayout
+                android:id="@+id/reunionesLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp" />
+
+        </LinearLayout>
+    </ScrollView>
+</RelativeLayout>

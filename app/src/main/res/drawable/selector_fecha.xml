@@ -1,0 +1,10 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- State for selected date -->
+    <item android:drawable="@drawable/circle_selected" android:state_selected="true"/>
+
+    <!-- State for dates with events -->
+    <item android:drawable="@drawable/circle_event" android:state_pressed="true"/>
+
+    <!-- Default state (no event, not selected) -->
+    <item android:drawable="@android:color/transparent"/>
+</selector>
