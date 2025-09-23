@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".FormularioCursoFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:scrollbars="vertical"
+        android:background="#FFFFFF">
+
+        <!-- Logotipos -->
+        <LinearLayout
+            android:id="@+id/logos_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:src="@drawable/cfe_logo"
+                android:scaleType="centerInside"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="18dp"/>
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:src="@drawable/suterm_logo"
+                android:scaleType="centerInside"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="18dp"/>
+        </LinearLayout>
+
+        <!-- Título -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Agregar curso"
+            android:textSize="24sp"
+            android:textColor="@android:color/black"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="32dp" />
+
+        <!-- Subtítulo -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ingrese los siguientes datos"
+            android:textColor="@android:color/black"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp" />
+
+        <!-- Campo Nombre del curso en Rectángulo -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/rect_border"
+            android:padding="8dp"
+            android:layout_marginTop="16dp">
+            <EditText
+                android:id="@+id/nombre_curso"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Nombre del curso"
+                android:textColor="@android:color/black"
+                android:background="@android:color/transparent"/>
+        </LinearLayout>
+
+        <!-- Campo Motivo del curso en Rectángulo -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/rect_border"
+            android:padding="8dp"
+            android:layout_marginTop="16dp">
+            <EditText
+                android:id="@+id/motivo_curso"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Motivo del curso"
+                android:textColor="@android:color/black"
+                android:background="@android:color/transparent"/>
+        </LinearLayout>
+
+
+        <!-- Campo Fecha con ícono en Rectángulo -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/rect_border"
+            android:padding="8dp"
+            android:layout_marginTop="16dp">
+            <EditText
+                android:id="@+id/fecha_curso"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Fecha del curso"
+                android:focusable="false"
+                android:clickable="true"
+                android:textColor="@android:color/black"
+                android:background="@android:color/transparent"/>
+            <ImageView
+                android:id="@+id/calendario"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/calendar_days_regular"
+                android:contentDescription="Icono de calendario"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <!-- Spinner Sistema en Rectángulo -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/rect_border"
+            android:padding="8dp"
+            android:layout_marginTop="16dp">
+            <Spinner
+                android:id="@+id/sistema_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/black"/>
+        </LinearLayout>
+
+        <!-- Spinner Recordar cada en Rectángulo -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/rect_border"
+            android:padding="8dp"
+            android:layout_marginTop="16dp">
+            <Spinner
+                android:id="@+id/recordatorio_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/black"/>
+        </LinearLayout>
+
+        <!-- Botón Enviar -->
+        <Button
+            android:id="@+id/enviar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Registrar curso"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#4CAF50"
+            android:layout_marginTop="14dp" />
+
+        <!-- Mensaje de Advertencia -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Una vez ingresado el curso no podrá ser eliminado"
+                android:textColor="@android:color/black"
+                android:layout_marginTop="8dp"
+                android:gravity="center" /> <!-- Centra el texto dentro del TextView -->
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
+
+
+
+
+
+
+
+

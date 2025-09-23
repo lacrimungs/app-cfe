@@ -1,0 +1,29 @@
+<!-- res/layout/item_evento.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="?android:attr/selectableItemBackground">
+
+    <!-- Nombre de la actividad -->
+    <TextView
+        android:id="@+id/nombreActividad"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nombre de la actividad"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:paddingBottom="8dp"
+        android:textColor="#000000" />
+
+    <!-- Motivo de la actividad -->
+    <TextView
+        android:id="@+id/motivoActividad"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Motivo de la actividad"
+        android:textSize="16sp"
+        android:textColor="#555555" />
+
+</LinearLayout>

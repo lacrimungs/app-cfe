@@ -1,0 +1,5 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/cfe_green"/> <!-- Background color for dates with events -->
+    <size android:width="40dp" android:height="40dp"/> <!-- Circle size -->
+    <corners android:radius="20dp"/> <!-- Circular shape -->
+</shape>

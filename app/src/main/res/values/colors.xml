@@ -1,0 +1,10 @@
+<resources>
+    <color name="black">#000000</color> <!-- Definición del color negro -->
+    <color name="white">#FFFFFF</color> <!-- Definición del color blanco -->
+    <color name="cfe_green">#4CAF50</color> <!-- Definición del color verde CFE -->
+    <color name="red">#FF0000</color> <!-- Definición del color rojo -->
+    <color name="calendar_selected_week">#FFDDDDDD</color>
+    <color name="calendar_focused_date">#FF000000</color>
+    <color name="calendar_unfocused_date">#FF888888</color>
+    <color name="calendar_selected_date_bar">#FF00FF00</color>
+</resources>

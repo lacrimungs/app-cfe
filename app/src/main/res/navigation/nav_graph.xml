@@ -1,0 +1,100 @@
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/navigation_home">
+
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="com.example.proyecto.PrincipalFragment"
+        android:label="Principal"
+        tools:layout="@layout/fragment_principal" />
+
+    <fragment
+        android:id="@+id/navigation_micuenta"
+        android:name="com.example.proyecto.MicuentaFragment"
+        android:label="Mi cuenta"
+        tools:layout="@layout/fragment_mi_cuenta" />
+
+    <fragment
+        android:id="@+id/navigation_campana"
+        android:name="com.example.proyecto.CampanaFragment"
+        android:label="Campana"
+        tools:layout="@layout/fragment_campana" />
+
+    <fragment
+        android:id="@+id/navigation_calendario"
+        android:name="com.example.proyecto.CalendarioFragment"
+        android:label="Calendario"
+        tools:layout="@layout/fragment_calendario" />
+
+    <fragment
+        android:id="@+id/navigation_cursos"
+        android:name="com.example.proyecto.CursosFragment"
+        android:label="Cursos"
+        tools:layout="@layout/fragment_cursos" />
+
+    <fragment
+        android:id="@+id/navigation_reuniones"
+        android:name="com.example.proyecto.ReunionesFragment"
+        android:label="Reuniones"
+        tools:layout="@layout/fragment_reuniones" />
+
+    <fragment
+        android:id="@+id/navigation_actividades"
+        android:name="com.example.proyecto.ActividadesFragment"
+        android:label="Actividades"
+        tools:layout="@layout/fragment_actividades"/>
+
+    <fragment
+        android:id="@+id/navigation_formulario_reunion"
+        android:name="com.example.proyecto.FomularioReunionFragment"
+        android:label="FormularioReunion"
+        tools:layout="@layout/fragment_fomulario_reunion">
+
+        <!-- Acción para navegar a EnviarReunionFragment -->
+        <action
+            android:id="@+id/navigation_enviar_reunion"
+            app:destination="@id/navigation_enviar_reunion" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_enviar_reunion"
+        android:name="com.example.proyecto.EnviarReunionFragment"
+        android:label="EnviarReunion"
+        tools:layout="@layout/fragment_enviar_reunion" />
+
+    <fragment
+        android:id="@+id/navigation_formulario_curso"
+        android:name="com.example.proyecto.FormularioCursoFragment"
+        android:label="FormularioCurso"
+        tools:layout="@layout/fragment_formulario_curso">
+
+        <!-- Acción para navegar a EnviarCursoFragment -->
+        <action
+            android:id="@+id/navigation_enviar_curso"
+            app:destination="@id/navigation_enviar_curso" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_formulario_actividad"
+        android:name="com.example.proyecto.FormularioActividadFragment"
+        android:label="FormularioActividad"
+        tools:layout="@layout/fragment_formulario_actividad">
+
+        <!-- Acción para navegar a EnviarActividadFragment -->
+        <action
+            android:id="@+id/navigation_enviar_actividad"
+            app:destination="@id/navigation_enviar_actividad" />
+    </fragment>
+
+    <!-- Definir el fragmento EnviarActividadFragment -->
+    <fragment
+        android:id="@+id/navigation_enviar_actividad"
+        android:name="com.example.proyecto.EnviarActividadFragment"
+        android:label="EnviarActividad"
+        tools:layout="@layout/fragment_enviar_actividad" />
+</navigation>
+
+
+
+

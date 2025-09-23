@@ -1,0 +1,47 @@
+<resources>
+    <!-- Array para el primer Spinner -->
+    <string-array name="spinner_items">
+        <item>Lugar</item>
+        <item>SADECI</item>
+        <item>TEAMS</item>
+    </string-array>
+
+    <!-- Array para el segundo Spinner (puedes usar uno diferente si lo necesitas) -->
+    <string-array name="spinner_items_2">
+        <item>Recordar cada</item>
+        <item>Hora</item>
+        <item>Dia</item>
+        <item>Semana</item>
+        <item>Mes</item>
+    </string-array>
+
+    <string-array name="spinner_items_3">
+        <item>Medio</item>
+        <item>Moodle</item>
+        <item>Teams</item>
+        <item>SADECI</item>
+    </string-array>
+
+
+    <string-array name="spinner_items_6">
+        <item>Categoria</item>
+        <item>Encargado</item>
+        <item>Profesionista</item>
+        <item>Colaborador</item>
+    </string-array>
+
+    <string-array name="spinner_items_7">
+        <item>Centro de atencion</item>
+        <item>Teziutlan</item>
+        <item>Tlapacoyan</item>
+        <item>Huehuetla</item>
+        <item>Juchique</item>
+        <item>Vega de la torre</item>
+        <item>San Rafael</item>
+        <item>Zacapoaxtla</item>
+        <item>Martinez de la Torre</item>
+        <item>Cuetzalan</item>
+        <item>Altotonga</item>
+    </string-array>
+</resources>
+

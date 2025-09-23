@@ -1,0 +1,113 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".FormularioActividadFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:scrollbars="vertical"
+        android:background="#FFFFFF">
+
+        <!-- Logotipos -->
+        <LinearLayout
+            android:id="@+id/logos_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:src="@drawable/cfe_logo"
+                android:scaleType="centerInside"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="18dp"/>
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:src="@drawable/suterm_logo"
+                android:scaleType="centerInside"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="18dp"/>
+        </LinearLayout>
+
+        <!-- Instrucción para el Spinner -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ingrese el nombre de los encargados o colaboradores que participaran en la actividad"
+            android:textColor="@android:color/black"
+            android:gravity="center"
+            android:layout_marginTop="32dp"/>
+
+        <!-- Spinner -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/rect_border"
+            android:padding="8dp"
+            android:layout_marginTop="16dp">
+
+            <Spinner
+                android:id="@+id/spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/black"/>
+        </LinearLayout>
+
+        <!-- Cuadro adicional para mostrar la selección -->
+        <LinearLayout
+            android:id="@+id/display_selected_value_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/rect_border"
+            android:padding="8dp"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:id="@+id/selected_value_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Trabajadores y colaboradores seleccionados"
+                android:textColor="@android:color/black"
+                android:padding="8dp"
+                android:gravity="center" />
+        </LinearLayout>
+
+        <!-- Botón Enviar -->
+        <Button
+            android:id="@+id/enviar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Registrar actividad"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#4CAF50"
+            android:layout_marginTop="14dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Una vez ingresada la actividad no podrá ser eliminada"
+                android:textColor="@android:color/black"
+                android:layout_marginTop="8dp"
+                android:gravity="center" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
