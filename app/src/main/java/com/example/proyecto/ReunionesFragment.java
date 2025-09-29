@@ -11,11 +11,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -31,16 +37,18 @@ public class ReunionesFragment extends Fragment {
     private FirebaseAuth mAuth;
     private LinearLayout reunionesLayout;
 
+    // Para leer rol desde /usuarios
+    private DatabaseReference usuariosRef;
+
     // SharedPreferences unificado
     private static final String PREFS_NAME = "tareas_realizadas";
     private static final String KEY_REUNIONES = "reuniones_realizadas";
 
     public ReunionesFragment() {}
 
-    public static ReunionesFragment newInstance(String param1, String param2) {
+    public static ReunionesFragment newInstance(String p1, String p2) {
         ReunionesFragment fragment = new ReunionesFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
+        fragment.setArguments(new Bundle());
         return fragment;
     }
 
@@ -48,6 +56,7 @@ public class ReunionesFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
+        usuariosRef = FirebaseDatabase.getInstance().getReference("usuarios");
     }
 
     @Override
@@ -55,74 +64,130 @@ public class ReunionesFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_reuniones, container, false);
 
-        // Imagen de signo
+        // Botón "+"
         ImageView signo = view.findViewById(R.id.signo);
-        signo.setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.navigation_formulario_reunion);
-        });
+        signo.setVisibility(View.GONE);
+        signo.setOnClickListener(null);
+        habilitarPlusSiEncargado(signo);
 
-        // Contenedor de reuniones
+        // Contenedor
         reunionesLayout = view.findViewById(R.id.reunionesLayout);
         if (reunionesLayout == null) {
             Toast.makeText(getContext(), "Error: LinearLayout no encontrado", Toast.LENGTH_LONG).show();
             return view;
         }
 
-        // Obtener reuniones
         obtenerReuniones();
-
         return view;
+    }
+
+    /** Solo muestra el "+" si categoriaCentro es Encargado/Encargados */
+    private void habilitarPlusSiEncargado(ImageView signo) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) return;
+        String uid = currentUser.getUid();
+
+        usuariosRef.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot snap) {
+                String rol = snap.child("categoriaCentro").getValue(String.class);
+                if (puedeVerPlus(rol)) {
+                    signo.setVisibility(View.VISIBLE);
+                    signo.setOnClickListener(v ->
+                            Navigation.findNavController(v)
+                                    .navigate(R.id.navigation_formulario_reunion));
+                } else {
+                    signo.setVisibility(View.GONE);
+                    signo.setOnClickListener(null);
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {
+                signo.setVisibility(View.GONE);
+                signo.setOnClickListener(null);
+            }
+        });
+
+        /* Alternativa con uidFirebase:
+        usuariosRef.orderByChild("uidFirebase").equalTo(uid)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override public void onDataChange(@NonNull DataSnapshot ds) {
+                        boolean autorizado = false;
+                        for (DataSnapshot u : ds.getChildren()) {
+                            String rol = u.child("categoriaCentro").getValue(String.class);
+                            if (puedeVerPlus(rol)) { autorizado = true; break; }
+                        }
+                        if (autorizado) {
+                            signo.setVisibility(View.VISIBLE);
+                            signo.setOnClickListener(v ->
+                                    Navigation.findNavController(v)
+                                            .navigate(R.id.navigation_formulario_reunion));
+                        } else {
+                            signo.setVisibility(View.GONE);
+                            signo.setOnClickListener(null);
+                        }
+                    }
+                    @Override public void onCancelled(@NonNull DatabaseError error) {
+                        signo.setVisibility(View.GONE);
+                        signo.setOnClickListener(null);
+                    }
+                });
+        */
+    }
+
+    private boolean puedeVerPlus(String rol) {
+        if (rol == null) return false;
+        String r = rol.trim().toLowerCase();
+        return r.equals("encargado") || r.equals("encargados");
     }
 
     private void obtenerReuniones() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            String userId = currentUser.getUid();
+        if (currentUser == null) {
+            Toast.makeText(getContext(), "Error: Usuario no autenticado", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-            Retrofit retrofit = ApiClient.getClient();
-            ApiService apiService = retrofit.create(ApiService.class);
+        String userId = currentUser.getUid();
+        Retrofit retrofit = ApiClient.getClient();
+        ApiService apiService = retrofit.create(ApiService.class);
 
-            Call<Map<String, Reunion>> call = apiService.getAllReuniones();
-            call.enqueue(new Callback<Map<String, Reunion>>() {
-                @Override
-                public void onResponse(Call<Map<String, Reunion>> call, Response<Map<String, Reunion>> response) {
-                    if (response.isSuccessful()) {
-                        Map<String, Reunion> reunionesMap = response.body();
+        Call<Map<String, Reunion>> call = apiService.getAllReuniones();
+        call.enqueue(new Callback<Map<String, Reunion>>() {
+            @Override
+            public void onResponse(Call<Map<String, Reunion>> call, Response<Map<String, Reunion>> response) {
+                if (!isAdded()) return; // evita crash si el fragment ya no está visible
+                if (response.isSuccessful()) {
+                    Map<String, Reunion> reunionesMap = response.body();
+                    reunionesLayout.removeAllViews();
 
-                        reunionesLayout.removeAllViews();
-
-                        if (reunionesMap != null) {
-                            for (String reunionId : reunionesMap.keySet()) {
-                                Reunion reunion = reunionesMap.get(reunionId);
-
-                                if (reunion != null) {
-                                    boolean esCreador = reunion.getUserId() != null && reunion.getUserId().equals(userId);
-                                    boolean esParticipante = reunion.getParticipantes() != null && reunion.getParticipantes().contains(userId);
-
-                                    // Solo mostrar si soy creador o participo y no está marcada como realizada
-                                    if ((esCreador || esParticipante) && !esReunionRealizada(getContext(), reunionId)) {
-                                        mostrarReunion(reunion, reunionId);
-                                    }
+                    if (reunionesMap != null) {
+                        for (String reunionId : reunionesMap.keySet()) {
+                            Reunion reunion = reunionesMap.get(reunionId);
+                            if (reunion != null) {
+                                boolean esCreador = reunion.getUserId() != null && reunion.getUserId().equals(userId);
+                                boolean esParticipante = reunion.getParticipantes() != null
+                                        && reunion.getParticipantes().contains(userId);
+                                if ((esCreador || esParticipante) && !esReunionRealizada(getContext(), reunionId)) {
+                                    mostrarReunion(reunion, reunionId);
                                 }
                             }
                         }
-                    } else {
-                        Toast.makeText(getContext(), "Error al obtener las reuniones", Toast.LENGTH_SHORT).show();
                     }
+                } else {
+                    Toast.makeText(getContext(), "Error al obtener las reuniones", Toast.LENGTH_SHORT).show();
                 }
+            }
 
-                @Override
-                public void onFailure(Call<Map<String, Reunion>> call, Throwable t) {
-                    Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                }
-            });
-        } else {
-            Toast.makeText(getContext(), "Error: Usuario no autenticado", Toast.LENGTH_SHORT).show();
-        }
+            @Override
+            public void onFailure(Call<Map<String, Reunion>> call, Throwable t) {
+                if (!isAdded()) return;
+                Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void mostrarReunion(Reunion reunion, String reunionId) {
-        View reunionView = LayoutInflater.from(getContext()).inflate(R.layout.item_reunion, reunionesLayout, false);
+        View reunionView = LayoutInflater.from(getContext())
+                .inflate(R.layout.item_reunion, reunionesLayout, false);
 
         TextView asuntoTextView = reunionView.findViewById(R.id.asunto);
         TextView motivoReunionTextView = reunionView.findViewById(R.id.motivoReunion);
@@ -144,20 +209,18 @@ public class ReunionesFragment extends Fragment {
         reunionesLayout.addView(reunionView);
     }
 
-    // Métodos estáticos para que también los use CampanaFragment
     public static void marcarReunionComoRealizada(Context context, String reunionId) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        Set<String> realizadas = new HashSet<>(sharedPreferences.getStringSet(KEY_REUNIONES, new HashSet<>()));
+        SharedPreferences sp = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        Set<String> realizadas = new HashSet<>(sp.getStringSet(KEY_REUNIONES, new HashSet<>()));
         realizadas.add(reunionId);
         editor.putStringSet(KEY_REUNIONES, realizadas);
         editor.apply();
     }
 
     public static boolean esReunionRealizada(Context context, String reunionId) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        Set<String> realizadas = sharedPreferences.getStringSet(KEY_REUNIONES, new HashSet<>());
+        SharedPreferences sp = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        Set<String> realizadas = sp.getStringSet(KEY_REUNIONES, new HashSet<>());
         return realizadas.contains(reunionId);
     }
 }

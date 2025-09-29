@@ -1,8 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".FormularioReunionFragment">
+    tools:context=".EnviarReunionFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -39,34 +40,56 @@
                 android:layout_marginTop="18dp"/>
         </LinearLayout>
 
-        <!-- Instrucción para el Spinner -->
+        <!-- Instrucción -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Ingrese el nombre de los encargados o colaboradores que participaran en la reunion"
+            android:text="Ingrese el nombre de los encargados o colaboradores que participarán en la reunión"
             android:textColor="@android:color/black"
             android:gravity="center"
             android:layout_marginTop="32dp"/>
 
-        <!-- Spinner -->
+        <!-- Cuadro de búsqueda (abre el selector) -->
         <LinearLayout
+            android:id="@+id/toolbarSeleccionUsuariosReu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:background="@drawable/rect_border"
-            android:padding="8dp"
-            android:layout_marginTop="16dp">
+            android:paddingStart="12dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:minHeight="56dp"
+            android:layout_marginTop="16dp"
+            android:gravity="end|center_vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
 
-            <Spinner
-                android:id="@+id/spinner"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tvIndicadorBusquedaReu"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/black"/>
+                android:layout_weight="1"
+                android:text="Buscar y seleccionar participantes"
+                android:textSize="16sp"
+                android:textColor="@android:color/black" />
+
+            <ImageButton
+                android:id="@+id/btnBuscarUsuariosReu"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@string/buscar_usuarios"
+                android:src="@android:drawable/ic_menu_search"
+                android:scaleType="centerInside"
+                android:background="@android:color/transparent"
+                android:padding="0dp" />
         </LinearLayout>
 
-        <!-- Cuadro adicional para mostrar la selección -->
+        <!-- Panel: seleccionados -->
         <LinearLayout
-            android:id="@+id/display_selected_value_layout"
+            android:id="@+id/display_selected_value_layout_reu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -75,13 +98,13 @@
             android:layout_marginTop="16dp">
 
             <TextView
-                android:id="@+id/selected_value_text"
-                android:layout_width="wrap_content"
+                android:id="@+id/selected_value_text_reu"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Trabajadores y colaboradores seleccionados"
                 android:textColor="@android:color/black"
                 android:padding="8dp"
-                android:gravity="center" />
+                android:gravity="start" />
         </LinearLayout>
 
         <!-- Botón Enviar -->
@@ -89,21 +112,21 @@
             android:id="@+id/enviar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Registrar reunion"
+            android:text="Registrar reunión"
             android:textColor="@android:color/white"
             android:backgroundTint="#4CAF50"
             android:layout_marginTop="14dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Una vez ingresada la reunion no podrá ser eliminada"
+                android:text="Una vez ingresada la reunión no podrá ser eliminada"
                 android:textColor="@android:color/black"
                 android:layout_marginTop="8dp"
                 android:gravity="center" />
@@ -111,4 +134,3 @@
 
     </LinearLayout>
 </ScrollView>
-

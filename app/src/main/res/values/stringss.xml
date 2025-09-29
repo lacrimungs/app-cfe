@@ -1,12 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Array para el primer Spinner -->
+
+    <!-- App -->
+    <string name="app_name">Proyecto</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Lupa / diálogo -->
+    <string name="buscar_usuarios">Buscar usuarios</string>
+    <string name="buscar_por_nombre">Buscar por nombre</string>
+    <string name="seleccionar_participantes">Participantes</string>
+    <string name="listo">Seleccionar</string>
+
+    <!-- Arrays (mismos nombres que ya usas) -->
     <string-array name="spinner_items">
         <item>Lugar</item>
         <item>SADECI</item>
         <item>TEAMS</item>
     </string-array>
 
-    <!-- Array para el segundo Spinner (puedes usar uno diferente si lo necesitas) -->
     <string-array name="spinner_items_2">
         <item>Recordar cada</item>
         <item>Hora</item>
@@ -21,7 +32,6 @@
         <item>Teams</item>
         <item>SADECI</item>
     </string-array>
-
 
     <string-array name="spinner_items_6">
         <item>Categoria</item>
@@ -43,5 +53,5 @@
         <item>Cuetzalan</item>
         <item>Altotonga</item>
     </string-array>
-</resources>
 
+</resources>

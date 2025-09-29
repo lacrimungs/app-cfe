@@ -59,38 +59,62 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="8dp" />
 
-        <!-- Campo Asunto en Rectángulo -->
+        <!-- Campo Nombre Actividad con micrófono -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:background="@drawable/rect_border"
             android:padding="8dp"
             android:layout_marginTop="16dp">
+
             <EditText
                 android:id="@+id/nombre_actividad"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:hint="Nombre de la actividad"
                 android:textColor="@android:color/black"
-                android:background="@android:color/transparent"/>
+                android:background="@android:color/transparent"
+                android:gravity="center_vertical"
+                android:paddingVertical="8dp"/>
+
+            <ImageButton
+                android:id="@+id/btnMicNombre"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_btn_speak_now"
+                android:contentDescription="Dictado por voz" />
         </LinearLayout>
 
-        <!-- Campo Motivo de la reunión en Rectángulo -->
+        <!-- Campo Motivo Actividad con micrófono -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:background="@drawable/rect_border"
             android:padding="8dp"
             android:layout_marginTop="16dp">
+
             <EditText
                 android:id="@+id/motivo_actividad"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:hint="Motivo de la actividad"
                 android:textColor="@android:color/black"
-                android:background="@android:color/transparent"/>
+                android:background="@android:color/transparent"
+                android:gravity="center_vertical"
+                android:paddingVertical="8dp"/>
+
+            <ImageButton
+                android:id="@+id/btnMicMotivo"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_btn_speak_now"
+                android:contentDescription="Dictado por voz" />
         </LinearLayout>
 
         <!-- Campo Fecha con ícono en Rectángulo -->
@@ -101,6 +125,7 @@
             android:background="@drawable/rect_border"
             android:padding="8dp"
             android:layout_marginTop="16dp">
+
             <EditText
                 android:id="@+id/fecha"
                 android:layout_width="0dp"
@@ -110,7 +135,10 @@
                 android:focusable="false"
                 android:clickable="true"
                 android:textColor="@android:color/black"
-                android:background="@android:color/transparent"/>
+                android:background="@android:color/transparent"
+                android:gravity="center_vertical"
+                android:paddingVertical="8dp"/>
+
             <ImageView
                 android:id="@+id/calendario"
                 android:layout_width="30dp"
@@ -120,8 +148,7 @@
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
-
-        <!-- Spinner Recordar cada 2 en Rectángulo -->
+        <!-- Spinner -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -129,11 +156,13 @@
             android:background="@drawable/rect_border"
             android:padding="8dp"
             android:layout_marginTop="16dp">
+
             <Spinner
                 android:id="@+id/spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/black"/>
+                android:gravity="center_vertical"
+                android:paddingVertical="8dp"/>
         </LinearLayout>
 
         <!-- Botón Enviar -->

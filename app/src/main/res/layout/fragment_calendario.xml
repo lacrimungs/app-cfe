@@ -2,80 +2,107 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#FFFFFF">
+    android:background="#FFFFFF"
+    android:padding="16dp">
 
-    <!-- Logotipos -->
+    <!-- Encabezado con logos -->
     <LinearLayout
-        android:id="@+id/logos_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:orientation="horizontal"
-        android:gravity="center_horizontal"
-        android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp">
 
-        <!-- Logo CFE -->
         <ImageView
-            android:layout_width="150dp"
-            android:layout_height="80dp"
-            android:layout_marginTop="18dp"
-            android:layout_marginEnd="16dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/cfe_logo" />
+            android:layout_width="120dp"
+            android:layout_height="60dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/cfe_logo"
+            android:layout_marginEnd="12dp" />
 
-        <!-- Logo SUTERM -->
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="80dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="18dp"
-            android:scaleType="centerInside"
+            android:layout_width="120dp"
+            android:layout_height="60dp"
+            android:scaleType="fitCenter"
             android:src="@drawable/suterm_logo" />
     </LinearLayout>
 
-    <!-- CalendarView para seleccionar las fechas -->
-    <android.widget.CalendarView
+    <!-- Título calendario -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#111827"
+        android:gravity="center"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- CalendarView nativo -->
+    <CalendarView
         android:id="@+id/calendarView"
         android:layout_width="match_parent"
-        android:layout_height="340dp"
-    android:layout_gravity="center"
-    android:layout_marginBottom="16dp"
-    android:focusable="true"
-    android:focusableInTouchMode="true"
-    android:padding="8dp"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp" />
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:dateTextAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:weekDayTextAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:focusedMonthDateColor="#111827"
+        android:unfocusedMonthDateColor="#9CA3AF"
+        android:weekSeparatorLineColor="#E5E7EB"
+        android:layout_marginBottom="16dp"/>
 
-    <!-- ScrollView para hacer que los eventos sean desplazables -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/exportarEventosMenu"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp">
+
+        <AutoCompleteTextView
+            android:id="@+id/dropdownExportar"
+            style="@style/Widget.MaterialComponents.AutoCompleteTextView.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="📤 Exportar eventos"
+            android:gravity="center_vertical"
+            android:inputType="none"
+            android:focusable="false"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textSize="15sp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+
+    <!-- Lista de eventos desplazable -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:fillViewport="true"
-        android:paddingTop="16dp">
+        android:fillViewport="true">
 
-        <!-- Contenedor para mostrar los eventos -->
         <LinearLayout
             android:id="@+id/eventosContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="16dp" />
+            android:divider="?android:attr/dividerHorizontal"
+            android:showDividers="middle"/>
     </ScrollView>
 
-    <!-- ProgressBar para mostrar mientras se cargan los eventos -->
+    <!-- Indicador de carga -->
     <ProgressBar
         android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_gravity="center"
-        android:visibility="gone"/>
+        android:layout_marginTop="12dp"
+        android:visibility="gone"
+        style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large"/>
 </LinearLayout>
-
-
-
 
 
 

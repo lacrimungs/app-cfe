@@ -6,16 +6,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.icu.util.Calendar;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Spinner;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,91 +39,103 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
+/**
+ * Fragment para crear/enviar actividad.
+ * - Abre un selector de usuarios (BottomSheet) tocando la lupa o el cuadro completo.
+ * - Mantiene selectedUsuarios (UIDs) y muestra los nombres seleccionados.
+ */
 public class EnviarActividadFragment extends Fragment {
 
     private static final Logger LOGGER = Logger.getLogger(EnviarActividadFragment.class.getName());
 
+    /** Claves para Fragment Result API */
+    public static final String FR_KEY_RESULT = "seleccion_usuarios_result";
+    public static final String FR_BUNDLE_SELECTED = "uids_seleccionados";
+
+    // Firebase
     private DatabaseReference databaseReference;
-    private Spinner usuariosSpinner;
     private FirebaseAuth mAuth;
-    private List<String> selectedUsuarios = new ArrayList<>(); // 🔹 Guardamos UIDs
+
+    // UI
     private TextView selectedValueTextView;
+    private ImageButton btnBuscarUsuarios;
 
-    // 🔹 Mapas para mostrar nombres pero guardar UIDs
-    private Map<String, String> nombreToUidMap = new HashMap<>();
-    private Map<String, String> uidToNombreMap = new HashMap<>();
+    // Selección (guardamos UIDs)
+    private final List<String> selectedUsuarios = new ArrayList<>();
+    private final Map<String, String> nombreToUidMap = new HashMap<>();
+    private final Map<String, String> uidToNombreMap = new HashMap<>();
 
-    public EnviarActividadFragment() {}
+    // Fuente de datos cruda para armar el selector
+    private final List<UsuariosSelectedAdapter.UsuarioItem> dataUsuarios = new ArrayList<>();
+
+    public EnviarActividadFragment() { }
 
     public static EnviarActividadFragment newInstance() {
         return new EnviarActividadFragment();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_enviar_actividad, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_enviar_actividad, container, false);
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Firebase
         databaseReference = FirebaseDatabase.getInstance().getReference("actividades");
         mAuth = FirebaseAuth.getInstance();
 
-        usuariosSpinner = view.findViewById(R.id.spinner);
+        // UI
         selectedValueTextView = view.findViewById(R.id.selected_value_text);
+        btnBuscarUsuarios     = view.findViewById(R.id.btnBuscarUsuarios);
+        Button guardarButton  = view.findViewById(R.id.enviar);
+
+        // >>> NUEVO: el cuadro completo también abre el selector <<<
+        View boxSeleccion = view.findViewById(R.id.toolbarSeleccionUsuarios);
+        View.OnClickListener openSelector = v -> abrirSelectorUsuarios();
+        btnBuscarUsuarios.setOnClickListener(openSelector);
+        boxSeleccion.setOnClickListener(openSelector);
+        // <<< FIN NUEVO >>>
+
+        // Cargar usuarios (para el selector)
         obtenerUsuarios();
 
-        // Obtener el objeto Actividad del Bundle
+        // Recibir actividad desde argumentos (si la mandas en el Bundle)
         Bundle bundle = getArguments();
         Actividad actividad = null;
         if (bundle != null) {
             actividad = (Actividad) bundle.getSerializable("actividad");
         }
-
-        // Botón "Guardar"
-        Button guardarButton = view.findViewById(R.id.enviar);
         Actividad finalActividad = actividad;
+
+        // Escuchar resultado del BottomSheet (Fragment Result API)
+        getParentFragmentManager().setFragmentResultListener(FR_KEY_RESULT, getViewLifecycleOwner(),
+                (requestKey, result) -> {
+                    ArrayList<String> uids = result.getStringArrayList(FR_BUNDLE_SELECTED);
+                    selectedUsuarios.clear();
+                    if (uids != null) selectedUsuarios.addAll(uids);
+                    actualizarTextoSeleccionado();
+                });
+
+        // Guardar
         guardarButton.setOnClickListener(v -> {
             if (finalActividad != null) {
                 String currentUid = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
-
-                // 🔹 Agregar creador automáticamente a la lista de participantes
-                if (currentUid != null && !selectedUsuarios.contains(currentUid)) {
-                    selectedUsuarios.add(currentUid);
+                if (!TextUtils.isEmpty(currentUid) && !selectedUsuarios.contains(currentUid)) {
+                    selectedUsuarios.add(currentUid); // agrega creador
                 }
-
-                finalActividad.setParticipantes(selectedUsuarios);
+                finalActividad.setParticipantes(new ArrayList<>(selectedUsuarios));
                 guardarActividad(finalActividad);
             } else {
                 LOGGER.log(Level.WARNING, "Actividad es nula al intentar guardar.");
+                Toast.makeText(requireContext(), "Actividad nula", Toast.LENGTH_SHORT).show();
             }
         });
-
-        // Selección múltiple de usuarios
-        usuariosSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedNombre = parent.getItemAtPosition(position).toString();
-
-                // 🔹 Si es el placeholder, no hacer nada
-                if (selectedNombre.equals("-- Selecciona un participante --")) {
-                    return;
-                }
-
-                String uid = nombreToUidMap.get(selectedNombre);
-
-                if (uid != null && !selectedUsuarios.contains(uid)) {
-                    selectedUsuarios.add(uid); // 🔹 Guardamos UID
-                    actualizarTextoSeleccionado();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                LOGGER.log(Level.INFO, "No se seleccionó ningún usuario.");
-            }
-        });
-
-        return view;
     }
 
+    /** Llama la API y llena dataUsuarios + mapas de nombre/uid */
     private void obtenerUsuarios() {
         Retrofit retrofit = ApiClient.getClient();
         ApiService apiService = retrofit.create(ApiService.class);
@@ -131,76 +144,101 @@ public class EnviarActividadFragment extends Fragment {
         call.enqueue(new Callback<Map<String, Usuario>>() {
             @Override
             public void onResponse(Call<Map<String, Usuario>> call, Response<Map<String, Usuario>> response) {
+                if (!isAdded()) return;
+
                 if (response.isSuccessful()) {
                     Map<String, Usuario> usuariosMap = response.body();
-                    List<String> nombresCompletos = new ArrayList<>();
-
                     String currentUid = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
 
-                    // 🔹 Agregamos un placeholder inicial
-                    nombresCompletos.add("-- Selecciona los participantes --");
+                    dataUsuarios.clear();
+                    nombreToUidMap.clear();
+                    uidToNombreMap.clear();
 
                     if (usuariosMap != null) {
                         for (Usuario usuario : usuariosMap.values()) {
-                            // 🔹 Excluir al creador de la actividad
-                            if (usuario.getUidFirebase() != null && !usuario.getUidFirebase().equals(currentUid)) {
-                                nombresCompletos.add(usuario.getNombreCompleto());
-                                nombreToUidMap.put(usuario.getNombreCompleto(), usuario.getUidFirebase());
-                                uidToNombreMap.put(usuario.getUidFirebase(), usuario.getNombreCompleto());
+                            if (usuario.getUidFirebase() == null) continue;
+
+                            // opcional: excluir creador, se agrega automático al guardar
+                            if (currentUid != null && usuario.getUidFirebase().equals(currentUid)) {
+                                continue;
                             }
+
+                            String uid = usuario.getUidFirebase();
+                            String nombre = usuario.getNombreCompleto();
+
+                            nombreToUidMap.put(nombre, uid);
+                            uidToNombreMap.put(uid, nombre);
+
+                            boolean preSelected = selectedUsuarios.contains(uid);
+                            dataUsuarios.add(new UsuariosSelectedAdapter.UsuarioItem(uid, nombre, preSelected));
                         }
                     }
 
-                    ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
-                            android.R.layout.simple_spinner_item, nombresCompletos);
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    usuariosSpinner.setAdapter(adapter);
+                    actualizarTextoSeleccionado();
                 } else {
                     LOGGER.log(Level.SEVERE, "Error al obtener los usuarios. Respuesta no exitosa.");
-                    Toast.makeText(getContext(), "Error al obtener los usuarios", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Error al obtener los usuarios", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Map<String, Usuario>> call, Throwable t) {
-                LOGGER.log(Level.SEVERE, "Error al realizar la llamada a la API: " + t.getMessage(), t);
-                Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                if (!isAdded()) return;
+                LOGGER.log(Level.SEVERE, "Error API usuarios: " + t.getMessage(), t);
+                Toast.makeText(requireContext(), "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
 
+    /** Abre el BottomSheet para seleccionar usuarios */
+    private void abrirSelectorUsuarios() {
+        ArrayList<UsuariosSelectedAdapter.UsuarioItem> copia = new ArrayList<>();
+        for (UsuariosSelectedAdapter.UsuarioItem it : dataUsuarios) {
+            copia.add(new UsuariosSelectedAdapter.UsuarioItem(it.uid, it.nombre, selectedUsuarios.contains(it.uid)));
+        }
+        SeleccionarUsuariosBottomSheet sheet = SeleccionarUsuariosBottomSheet.newInstance(copia);
+        sheet.show(getParentFragmentManager(), "SeleccionarUsuariosBottomSheet");
+    }
+
+    /** Actualiza el cuadro con los nombres de los seleccionados */
     private void actualizarTextoSeleccionado() {
-        StringBuilder seleccionados = new StringBuilder("Participantes:\n");
+        if (selectedUsuarios.isEmpty()) {
+            selectedValueTextView.setText("Participantes: ninguno");
+            return;
+        }
+        StringBuilder sb = new StringBuilder("Participantes:\n");
         for (String uid : selectedUsuarios) {
             String nombre = uidToNombreMap.get(uid);
-            seleccionados.append(nombre != null ? nombre : uid).append("\n");
+            sb.append(nombre != null ? nombre : uid).append("\n");
         }
-        selectedValueTextView.setText(seleccionados.toString());
+        selectedValueTextView.setText(sb.toString());
     }
 
+    /** Guarda la actividad y programa alarmas locales */
     private void guardarActividad(Actividad actividad) {
         try {
-            if (actividad != null) {
-                databaseReference.push().setValue(actividad)
-                        .addOnSuccessListener(aVoid -> {
-                            LOGGER.log(Level.INFO, "Actividad guardada exitosamente.");
-                            Toast.makeText(getContext(), "Actividad guardada exitosamente", Toast.LENGTH_SHORT).show();
-                            programarNotificacionesLocales(actividad);
-                        })
-                        .addOnFailureListener(e -> {
-                            LOGGER.log(Level.SEVERE, "Error al guardar la actividad: " + e.getMessage(), e);
-                            Toast.makeText(getContext(), "Error al guardar la actividad: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                        });
-            } else {
-                LOGGER.log(Level.WARNING, "La actividad no se ha podido guardar ya que es nula.");
-                Toast.makeText(getContext(), "Actividad nula", Toast.LENGTH_SHORT).show();
+            if (actividad == null) {
+                Toast.makeText(requireContext(), "Actividad nula", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            databaseReference.push().setValue(actividad)
+                    .addOnSuccessListener(aVoid -> {
+                        LOGGER.log(Level.INFO, "Actividad guardada exitosamente.");
+                        Toast.makeText(requireContext(), "Actividad guardada exitosamente", Toast.LENGTH_SHORT).show();
+                        programarNotificacionesLocales(actividad);
+                    })
+                    .addOnFailureListener(e -> {
+                        LOGGER.log(Level.SEVERE, "Error al guardar la actividad: " + e.getMessage(), e);
+                        Toast.makeText(requireContext(), "Error al guardar la actividad: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    });
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Excepción inesperada al guardar la actividad: " + e.getMessage(), e);
-            Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            LOGGER.log(Level.SEVERE, "Excepción al guardar: " + e.getMessage(), e);
+            Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
+    /** Programa notificaciones locales a participantes + creador */
     private void programarNotificacionesLocales(Actividad actividad) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String creadorNombre = obtenerNombreCompletoUsuario(actividad.getUserId());
@@ -209,29 +247,35 @@ public class EnviarActividadFragment extends Fragment {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     Usuario usuario = document.toObject(Usuario.class);
-                    if (actividad.getParticipantes().contains(usuario.getUidFirebase()) ||
-                            usuario.getUidFirebase().equals(actividad.getUserId())) {
+                    if (actividad.getParticipantes().contains(usuario.getUidFirebase())
+                            || usuario.getUidFirebase().equals(actividad.getUserId())) {
                         programarNotificacion(usuario, actividad, creadorNombre);
                     }
                 }
             } else {
-                LOGGER.log(Level.SEVERE, "Error al obtener los usuarios de Firestore: " + task.getException().getMessage());
-                Toast.makeText(getContext(), "Error al obtener los usuarios: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                if (!isAdded()) return;
+                LOGGER.log(Level.SEVERE, "Error al obtener usuarios de Firestore: " + task.getException().getMessage());
+                Toast.makeText(requireContext(), "Error al obtener los usuarios: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void programarNotificacion(Usuario usuario, Actividad actividad, String creadorNombre) {
         try {
-            Intent intent = new Intent(getContext(), AlarmReceiver.class);
+            Intent intent = new Intent(requireContext(), AlarmReceiver.class);
             intent.putExtra("title", "Recordatorio de Actividad");
             intent.putExtra("message", creadorNombre + " ha creado una actividad: " + actividad.getNombredelaactividad());
 
+            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                flags |= PendingIntent.FLAG_IMMUTABLE;
+            }
+
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                    getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+                    requireContext(), usuario.getUidFirebase().hashCode(), intent, flags
             );
 
-            AlarmManager alarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+            AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
             Calendar calendar = Calendar.getInstance();
 
             try {
@@ -242,18 +286,10 @@ public class EnviarActividadFragment extends Fragment {
             }
 
             switch (actividad.getRecordatorio()) {
-                case "Hora":
-                    calendar.add(Calendar.HOUR_OF_DAY, -1);
-                    break;
-                case "Mes":
-                    calendar.add(Calendar.MONTH, -1);
-                    break;
-                case "Semana":
-                    calendar.add(Calendar.WEEK_OF_YEAR, -1);
-                    break;
-                case "Dia":
-                    calendar.add(Calendar.DAY_OF_YEAR, -1);
-                    break;
+                case "Hora":   calendar.add(Calendar.HOUR_OF_DAY, -1);   break;
+                case "Mes":    calendar.add(Calendar.MONTH, -1);         break;
+                case "Semana": calendar.add(Calendar.WEEK_OF_YEAR, -1);  break;
+                case "Dia":    calendar.add(Calendar.DAY_OF_YEAR, -1);   break;
             }
 
             if (alarmManager != null) {
@@ -265,7 +301,6 @@ public class EnviarActividadFragment extends Fragment {
     }
 
     private String obtenerNombreCompletoUsuario(String userId) {
-        // 🔹 Aquí puedes implementar una consulta real a Firestore para obtener el nombre
         return "Participante";
     }
 }

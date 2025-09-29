@@ -6,16 +6,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.icu.util.Calendar;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Spinner;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,154 +39,173 @@ import retrofit2.Retrofit;
 
 public class EnviarReunionFragment extends Fragment {
 
+    // Claves propias para este fragmento
+    public static final String FR_KEY_RESULT_REU = "seleccion_usuarios_result_reu";
+    public static final String FR_BUNDLE_SELECTED_REU = "uids_seleccionados_reu";
+
     private DatabaseReference databaseReference;
-    private Spinner usuariosSpinner;
-    private List<String> selectedUsuarios = new ArrayList<>(); // Guardamos UIDs
-    private TextView selectedValueTextView;
     private FirebaseAuth mAuth;
 
-    // Map: Nombre completo → UID de FirebaseAuth
-    private Map<String, String> usuariosMapUid = new HashMap<>();
+    private TextView selectedValueTextView;
+    private ImageButton btnBuscarUsuarios;
+    private View boxSeleccion;
+
+    // Mantener UIDs seleccionados y mapa UID->Nombre
+    private final List<String> selectedUsuarios = new ArrayList<>();
+    private final Map<String, String> uidToNombreMap = new HashMap<>();
+
+    // Fuente para el BottomSheet
+    private final List<UsuariosSelectedAdapter.UsuarioItem> dataUsuarios = new ArrayList<>();
 
     public EnviarReunionFragment() {}
 
-    public static EnviarReunionFragment newInstance() {
-        return new EnviarReunionFragment();
+    public static EnviarReunionFragment newInstance() { return new EnviarReunionFragment(); }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_enviar_reunion, container, false);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_enviar_reunion, container, false);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         mAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference("reuniones");
 
-        usuariosSpinner = view.findViewById(R.id.spinner);
-        selectedValueTextView = view.findViewById(R.id.selected_value_text);
+        selectedValueTextView = view.findViewById(R.id.selected_value_text_reu);
+        btnBuscarUsuarios     = view.findViewById(R.id.btnBuscarUsuariosReu);
+        boxSeleccion          = view.findViewById(R.id.toolbarSeleccionUsuariosReu);
+        Button guardarButton  = view.findViewById(R.id.enviar);
 
+        // Abrir selector tocando la lupa o el cuadro completo
+        View.OnClickListener open = v -> abrirSelectorUsuarios();
+        btnBuscarUsuarios.setOnClickListener(open);
+        boxSeleccion.setOnClickListener(open);
+
+        // Cargar usuarios
         obtenerUsuarios();
 
-        // Obtener el objeto Reunion del Bundle
-        Bundle bundle = getArguments();
+        // Obtener la reunión del bundle
         Reunion reunion = null;
-        if (bundle != null) {
-            reunion = (Reunion) bundle.getSerializable("reunion");
-        }
-
-        // Botón "Guardar"
+        Bundle bundle = getArguments();
+        if (bundle != null) reunion = (Reunion) bundle.getSerializable("reunion");
         Reunion finalReunion = reunion;
-        Button guardarButton = view.findViewById(R.id.enviar);
-        guardarButton.setOnClickListener(v -> {
-            if (finalReunion != null) {
-                String currentUid = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
 
-                // 🔹 Agregar creador automáticamente
-                if (currentUid != null && !selectedUsuarios.contains(currentUid)) {
-                    selectedUsuarios.add(currentUid);
-                }
+        // Escuchar resultado del sheet (usamos puente para reutilizar el mismo sheet)
+        getParentFragmentManager().setFragmentResultListener(
+                EnviarActividadFragment.FR_KEY_RESULT, getViewLifecycleOwner(), (key, res) -> {
+                    ArrayList<String> uids = res.getStringArrayList(EnviarActividadFragment.FR_BUNDLE_SELECTED);
+                    Bundle out = new Bundle();
+                    out.putStringArrayList(FR_BUNDLE_SELECTED_REU, uids);
+                    getParentFragmentManager().setFragmentResult(FR_KEY_RESULT_REU, out);
+                });
 
-                finalReunion.setParticipantes(selectedUsuarios);
-                guardarReunion(finalReunion);
-            }
-        });
-
-        // Listener para seleccionar usuarios
-        usuariosSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedNombre = parent.getItemAtPosition(position).toString();
-
-                // 🔹 Si es el placeholder, no hacer nada
-                if (selectedNombre.equals("-- Selecciona un participante --")) {
-                    return;
-                }
-
-                String selectedUid = usuariosMapUid.get(selectedNombre);
-
-                if (selectedUid != null && !selectedUsuarios.contains(selectedUid)) {
-                    selectedUsuarios.add(selectedUid); // Guardamos UID
+        getParentFragmentManager().setFragmentResultListener(
+                FR_KEY_RESULT_REU, getViewLifecycleOwner(), (key, res) -> {
+                    ArrayList<String> uids = res.getStringArrayList(FR_BUNDLE_SELECTED_REU);
+                    selectedUsuarios.clear();
+                    if (uids != null) selectedUsuarios.addAll(uids);
                     actualizarTextoSeleccionado();
-                }
+                });
+
+        // Guardar
+        guardarButton.setOnClickListener(v -> {
+            if (finalReunion == null) {
+                Toast.makeText(requireContext(), "Reunión nula", Toast.LENGTH_SHORT).show();
+                return;
             }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            String currentUid = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
+            if (!TextUtils.isEmpty(currentUid) && !selectedUsuarios.contains(currentUid)) {
+                selectedUsuarios.add(currentUid); // agrega creador
+            }
+            finalReunion.setParticipantes(new ArrayList<>(selectedUsuarios));
+            guardarReunion(finalReunion);
         });
-
-        return view;
     }
 
+    /** Obtiene usuarios del API y arma la lista para el selector */
     private void obtenerUsuarios() {
         Retrofit retrofit = ApiClient.getClient();
         ApiService apiService = retrofit.create(ApiService.class);
 
-        Call<Map<String, Usuario>> call = apiService.getUsuarios();
-        call.enqueue(new Callback<Map<String, Usuario>>() {
+        apiService.getUsuarios().enqueue(new Callback<Map<String, Usuario>>() {
             @Override
             public void onResponse(Call<Map<String, Usuario>> call, Response<Map<String, Usuario>> response) {
+                if (!isAdded()) return;
+
                 if (response.isSuccessful()) {
                     Map<String, Usuario> usuarios = response.body();
-                    List<String> nombresCompletos = new ArrayList<>();
-
                     String currentUid = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
 
-                    // 🔹 Agregar placeholder inicial
-                    nombresCompletos.add("-- Selecciona un participante --");
+                    dataUsuarios.clear();
+                    uidToNombreMap.clear();
 
                     if (usuarios != null) {
-                        for (Usuario usuario : usuarios.values()) {
-                            // Excluir al creador de la reunión
-                            if (usuario.getUidFirebase() != null && !usuario.getUidFirebase().equals(currentUid)) {
-                                nombresCompletos.add(usuario.getNombreCompleto());
-                                usuariosMapUid.put(usuario.getNombreCompleto(), usuario.getUidFirebase());
+                        for (Usuario u : usuarios.values()) {
+                            if (u.getUidFirebase() == null) continue;
+                            if (currentUid != null && currentUid.equals(u.getUidFirebase())) {
+                                // se agrega automáticamente al guardar
+                                continue;
                             }
+                            String uid = u.getUidFirebase();
+                            String nombre = u.getNombreCompleto();
+                            uidToNombreMap.put(uid, nombre);
+                            boolean preSel = selectedUsuarios.contains(uid);
+                            dataUsuarios.add(new UsuariosSelectedAdapter.UsuarioItem(uid, nombre, preSel));
                         }
                     }
-
-                    ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                            getContext(),
-                            android.R.layout.simple_spinner_item,
-                            nombresCompletos
-                    );
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    usuariosSpinner.setAdapter(adapter);
+                    actualizarTextoSeleccionado();
                 } else {
-                    Toast.makeText(getContext(), "Error al obtener los usuarios", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Error al obtener usuarios", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Map<String, Usuario>> call, Throwable t) {
-                Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                if (!isAdded()) return;
+                Toast.makeText(requireContext(), "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
 
-    private void actualizarTextoSeleccionado() {
-        StringBuilder seleccionados = new StringBuilder("Participantes:\n");
-        for (String uid : selectedUsuarios) {
-            for (Map.Entry<String, String> entry : usuariosMapUid.entrySet()) {
-                if (entry.getValue().equals(uid)) {
-                    seleccionados.append(entry.getKey()).append("\n");
-                }
-            }
+    /** Abre el BottomSheet de selección reutilizado */
+    private void abrirSelectorUsuarios() {
+        ArrayList<UsuariosSelectedAdapter.UsuarioItem> copia = new ArrayList<>();
+        for (UsuariosSelectedAdapter.UsuarioItem it : dataUsuarios) {
+            copia.add(new UsuariosSelectedAdapter.UsuarioItem(it.uid, it.nombre, selectedUsuarios.contains(it.uid)));
         }
-        selectedValueTextView.setText(seleccionados.toString());
+        SeleccionarUsuariosBottomSheet sheet = SeleccionarUsuariosBottomSheet.newInstance(copia);
+        sheet.show(getParentFragmentManager(), "SeleccionarUsuariosBottomSheetReunion");
     }
 
+    /** Muestra los nombres elegidos */
+    private void actualizarTextoSeleccionado() {
+        if (selectedUsuarios.isEmpty()) {
+            selectedValueTextView.setText("Participantes: ninguno");
+            return;
+        }
+        StringBuilder sb = new StringBuilder("Participantes:\n");
+        for (String uid : selectedUsuarios) {
+            String nombre = uidToNombreMap.get(uid);
+            sb.append(nombre != null ? nombre : uid).append('\n');
+        }
+        selectedValueTextView.setText(sb.toString());
+    }
+
+    /** Guarda y programa notificaciones locales */
     private void guardarReunion(Reunion reunion) {
         try {
             databaseReference.push().setValue(reunion)
                     .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(getContext(), "Reunión guardada exitosamente", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Reunión guardada exitosamente", Toast.LENGTH_SHORT).show();
                         programarNotificacionesLocales(reunion);
                     })
                     .addOnFailureListener(e ->
-                            Toast.makeText(getContext(), "Error al guardar la reunión: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                            Toast.makeText(requireContext(), "Error al guardar la reunión: " + e.getMessage(), Toast.LENGTH_LONG).show()
                     );
         } catch (Exception e) {
-            Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
+            Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -197,52 +217,43 @@ public class EnviarReunionFragment extends Fragment {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     Usuario usuario = document.toObject(Usuario.class);
-                    if (reunion.getParticipantes().contains(usuario.getUidFirebase()) ||
-                            usuario.getUidFirebase().equals(reunion.getUserId())) {
+                    if (reunion.getParticipantes().contains(usuario.getUidFirebase())
+                            || usuario.getUidFirebase().equals(reunion.getUserId())) {
                         programarNotificacion(usuario, reunion, creadorNombre);
                     }
                 }
             } else {
-                Toast.makeText(getContext(), "Error al obtener los usuarios: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Error al obtener los usuarios: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void programarNotificacion(Usuario usuario, Reunion reunion, String creadorNombre) {
-        Intent intent = new Intent(getContext(), AlarmReceiver.class);
+        Intent intent = new Intent(requireContext(), AlarmReceiver.class);
         intent.putExtra("title", "Recordatorio de Reunión");
         intent.putExtra("message", creadorNombre + " ha creado una reunión: " + reunion.getAsunto());
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                getContext(),
-                0,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            flags |= PendingIntent.FLAG_IMMUTABLE;
+        }
 
-        AlarmManager alarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                requireContext(), usuario.getUidFirebase().hashCode(), intent, flags);
+
+        AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
         Calendar calendar = Calendar.getInstance();
 
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             calendar.setTime(sdf.parse(reunion.getFecha()));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        } catch (ParseException ignored) {}
 
         switch (reunion.getRecordatorio()) {
-            case "Hora":
-                calendar.add(Calendar.HOUR_OF_DAY, -1);
-                break;
-            case "Mes":
-                calendar.add(Calendar.MONTH, -1);
-                break;
-            case "Semana":
-                calendar.add(Calendar.WEEK_OF_YEAR, -1);
-                break;
-            case "Dia":
-                calendar.add(Calendar.DAY_OF_YEAR, -1);
-                break;
+            case "Hora":   calendar.add(Calendar.HOUR_OF_DAY, -1);   break;
+            case "Mes":    calendar.add(Calendar.MONTH, -1);         break;
+            case "Semana": calendar.add(Calendar.WEEK_OF_YEAR, -1);  break;
+            case "Dia":    calendar.add(Calendar.DAY_OF_YEAR, -1);   break;
         }
 
         if (alarmManager != null) {
@@ -251,8 +262,7 @@ public class EnviarReunionFragment extends Fragment {
     }
 
     private String obtenerNombreCompletoUsuario(String userId) {
-        // Aquí deberías implementar la lógica real para obtener el nombre del usuario según su UID
+        // Implementa consulta real si lo necesitas
         return "Nombre Creador";
     }
 }
-

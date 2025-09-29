@@ -13,9 +13,8 @@
         android:scrollbars="vertical"
         android:background="#FFFFFF">
 
-        <!-- Logotipos -->
+        <!-- Logos -->
         <LinearLayout
-            android:id="@+id/logos_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -59,41 +58,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="8dp" />
 
-        <!-- Campo Asunto en Rectángulo -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/rect_border"
-            android:padding="8dp"
-            android:layout_marginTop="16dp">
-            <EditText
-                android:id="@+id/asunto"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Asunto"
-                android:textColor="@android:color/black"
-                android:background="@android:color/transparent"/>
-        </LinearLayout>
-
-        <!-- Campo Motivo de la reunión en Rectángulo -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/rect_border"
-            android:padding="8dp"
-            android:layout_marginTop="16dp">
-            <EditText
-                android:id="@+id/motivodelareunion"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Motivo de la reunión"
-                android:textColor="@android:color/black"
-                android:background="@android:color/transparent"/>
-        </LinearLayout>
-
-        <!-- Campo Fecha con ícono en Rectángulo -->
+        <!-- Asunto con micrófono -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -101,6 +66,65 @@
             android:background="@drawable/rect_border"
             android:padding="8dp"
             android:layout_marginTop="16dp">
+
+            <EditText
+                android:id="@+id/asunto"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Asunto"
+                android:textColor="@android:color/black"
+                android:background="@android:color/transparent"
+                android:gravity="center_vertical"
+                android:paddingVertical="8dp"/>
+
+            <ImageButton
+                android:id="@+id/btnMicAsunto"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_btn_speak_now"
+                android:contentDescription="Dictado por voz"/>
+        </LinearLayout>
+
+        <!-- Motivo con micrófono -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/rect_border"
+            android:padding="8dp"
+            android:layout_marginTop="16dp">
+
+            <EditText
+                android:id="@+id/motivodelareunion"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Motivo de la reunión"
+                android:textColor="@android:color/black"
+                android:background="@android:color/transparent"
+                android:gravity="center_vertical"
+                android:paddingVertical="8dp"/>
+
+            <ImageButton
+                android:id="@+id/btnMicMotivoReunion"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_btn_speak_now"
+                android:contentDescription="Dictado por voz"/>
+        </LinearLayout>
+
+        <!-- Fecha -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/rect_border"
+            android:padding="8dp"
+            android:layout_marginTop="16dp">
+
             <EditText
                 android:id="@+id/fecha"
                 android:layout_width="0dp"
@@ -110,7 +134,10 @@
                 android:focusable="false"
                 android:clickable="true"
                 android:textColor="@android:color/black"
-                android:background="@android:color/transparent"/>
+                android:background="@android:color/transparent"
+                android:gravity="center_vertical"
+                android:paddingVertical="8dp"/>
+
             <ImageView
                 android:id="@+id/calendario"
                 android:layout_width="30dp"
@@ -121,7 +148,7 @@
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
-        <!-- Spinner Recordar cada en Rectángulo -->
+        <!-- Spinner Medio -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -132,11 +159,10 @@
             <Spinner
                 android:id="@+id/my_spinner"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@android:color/black"/>
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
-        <!-- Spinner Recordar cada 2 en Rectángulo -->
+        <!-- Spinner Recordatorio -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -147,8 +173,7 @@
             <Spinner
                 android:id="@+id/spinner"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@android:color/black"/>
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <!-- Botón Enviar -->
@@ -160,7 +185,6 @@
             android:textColor="@android:color/white"
             android:backgroundTint="#4CAF50"
             android:layout_marginTop="14dp" />
-
     </LinearLayout>
 </ScrollView>
 
